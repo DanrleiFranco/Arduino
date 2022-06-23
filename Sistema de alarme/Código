@@ -1,0 +1,48 @@
+#define pinLDR A1// --> uma extremidade do LDR recebe o 5 volts e a outra recebe uma porta analógica e o GND 
+//(o GND passa primeiro pelo resistor de 10k e em seguida com a outra extremidade do resistor conecta-se na extremidade do LDR), nessa função o LDR está como PULL UP, 
+//ou seja, maior a luz, maior será o valor no monitor serial. Para o inverso basta trocar o GND com o positivo 5 volts, ou seja, maior a luz, menor o valor no monitor serial
+#define pin_buzzer 2
+#define pin_LED_vermelho 3
+#define pin_LED_verde 4
+#define nivelLuz 300
+//#define nivelLuz 900
+//#define nivelLuz 300
+void setup() {
+pinMode(pin_buzzer, OUTPUT);
+pinMode(pin_LED_verde, OUTPUT);
+pinMode(pin_LED_vermelho, OUTPUT);
+Serial.begin(9600);
+}
+void loop() {
+  //variável armazena os valores que variam entre 0 e 1024 na porta analógica A1 do arduino:
+int valorLDR = analogRead(pinLDR);
+//mostra os valores no monitor serial: 
+Serial.println(valorLDR);
+  if(valorLDR < nivelLuz)
+  {
+// os comentários abaixo servem para mudar a frequencia de som do buzzer se assim o programador desejar:  
+//    digitalWrite(pin_LED_verde, LOW);
+//    digitalWrite(pin_LED_vermelho, HIGH);
+//    delay(50);
+//    digitalWrite(pin_LED_vermelho,  LOW);
+//    tone(pin_buzzer, 1500);
+//    delay(200);
+//    tone(pin_buzzer, 2000);
+//    delay(200);
+
+    digitalWrite(pin_LED_verde, LOW);
+    digitalWrite(pin_LED_vermelho, HIGH);
+    digitalWrite(pin_buzzer, HIGH);
+//    tone(pin_buzzer, 1500);
+//    delay(1000);
+
+  
+  }
+    else
+    {
+      digitalWrite(pin_LED_vermelho, LOW);
+      digitalWrite(pin_LED_verde, HIGH);
+      digitalWrite(pin_buzzer, LOW);
+//      delay(1000);
+    }
+  }
