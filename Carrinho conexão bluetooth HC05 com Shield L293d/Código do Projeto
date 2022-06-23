@@ -1,0 +1,112 @@
+// biblioteca do módulo bluetooth:
+#include <SoftwareSerial.h>
+//pinos de comunicação do módulo bluetooth com o Arduino:
+SoftwareSerial DADOS(14, 15);/* RX -> pino 11 , TX -> pino 10 */
+//biblioteca da shield:
+#include <AFMotor.h>
+//definição dos pinos digitáis utilizados pela biblioteca AFmotor.h
+AF_DCMotor motor1(1);
+AF_DCMotor motor2(2);
+AF_DCMotor motor3(3);
+AF_DCMotor motor4(4);
+#define led 19
+#define buzzer 13
+
+void setup(){
+  pinMode(buzzer, OUTPUT);
+  pinMode(led, OUTPUT);
+  //permite mostrar os valores recebidos pelo módulo bluetooth e enviados ao Arduino:
+  Serial.begin(9600);
+  DADOS.begin(9600);
+}
+
+void loop(){  
+
+   byte velocidade = 250;
+   //armazena os valores enviados ao módulo bluetooth e recebido pelo arduino:
+   char leitor_Sinal_Serial;
+              
+    if(DADOS.available()) {  
+      leitor_Sinal_Serial = DADOS.read(); 
+      Serial.println(leitor_Sinal_Serial);
+    }
+  
+    switch(leitor_Sinal_Serial){
+
+       // COMPONENTES EXTERNOS:
+      case 'W':
+        digitalWrite(led, HIGH); // LED dianteiro acesso
+        break;
+      case 'w':
+        digitalWrite(led, LOW); // LED dianteiro apagado
+        break;
+      case 'V':
+        digitalWrite(buzzer, HIGH);// BUZINA Ligada
+        break;
+      case 'v':
+        digitalWrite(buzzer, LOW);// BUZINA Apagada
+        break;
+        
+      // COMANDO DOS MOTORES:  
+      case 'F':{
+        //Serial.print("CIMA: ");
+        motor1.setSpeed(velocidade); // velocidade máxima 0 a 255
+        motor2.setSpeed(velocidade); 
+        motor3.setSpeed(velocidade); 
+        motor4.setSpeed(velocidade); 
+        motor1.run(FORWARD); // sentido de rotação horário
+        motor2.run(FORWARD); 
+        motor3.run(FORWARD); 
+        motor4.run(FORWARD); 
+        break;
+      }
+      case 'B':{
+        //Serial.print("BAIXO: ");
+        motor1.setSpeed(velocidade);
+        motor2.setSpeed(velocidade);
+        motor3.setSpeed(velocidade);
+        motor4.setSpeed(velocidade);
+        motor1.run(BACKWARD);
+        motor2.run(BACKWARD);
+        motor3.run(BACKWARD);
+        motor4.run(BACKWARD);
+        break;
+      }
+      case 'R':{
+        //Serial.print("DIREITA: ");
+        motor1.setSpeed(velocidade);
+        motor2.setSpeed(velocidade);
+        motor3.setSpeed(velocidade);
+        motor4.setSpeed(velocidade);
+        motor1.run(BACKWARD);
+        motor2.run(FORWARD);
+        motor3.run(FORWARD);
+        motor4.run(BACKWARD);
+        break;
+      }
+      case 'L':{
+        //Serial.print("ESQUERDA: ");
+        //Serial.print("BAIXO: ");
+        motor1.setSpeed(velocidade);
+        motor2.setSpeed(velocidade);
+        motor3.setSpeed(velocidade);
+        motor4.setSpeed(velocidade);
+        motor1.run(FORWARD);
+        motor2.run(BACKWARD);
+        motor3.run(BACKWARD);
+        motor4.run(FORWARD);
+        break;
+      }
+      default :{
+        // Serial.print("MOTORES DESLIGADOS:: ");
+        motor1.setSpeed(0); // velocidade 0, motor parado
+        motor2.setSpeed(0); 
+        motor3.setSpeed(0); 
+        motor4.setSpeed(0); 
+        motor1.run(RELEASE);// motor parado
+        motor2.run(RELEASE);
+        motor3.run(RELEASE);
+        motor4.run(RELEASE);
+      }
+    } 
+  }
