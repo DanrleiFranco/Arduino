@@ -1,0 +1,205 @@
+ 
+//     A0, A1, A2, A3, A4, A5
+//     14, 15, 16, 17, 18, 19
+//biblioteca que permite a comunicação dos sinais enviados do contrele para o Arduino:
+#include <PS2X_lib.h>
+// portas digitais que receberão os sinais:
+#define in_1 3
+#define in_2 5
+#define in_3 6
+#define in_4 9
+#define buzzer 13
+
+PS2X ps2x; // cria o objeto "ps2x" para a biblioteca "PS2X"
+int error = 0; 
+byte type = 0;
+byte vibrate = 0;
+
+void setup(){
+  //habilitação das portas digitais como saida:
+  pinMode(in_1, OUTPUT);
+  pinMode(in_2, OUTPUT);
+  pinMode(in_3, OUTPUT);
+  pinMode(in_4, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  //permite a visualização dos sinais enviados pelo controle no monitor serial:
+  Serial.begin(57600); 
+  error = ps2x.config_gamepad(15,16,17,18, true, true);   //setup pins and settings:  GamePad(clock (marrom), command(cinza), attention(lilás), data(branco),
+                                                          //Pressures?, Rumble?) check for error
+}
+
+void loop(){
+  byte velocidade = 250;
+//  byte velocidade = ps2x.Analog(PSS_LX);
+  byte velocidade_lenta = 100;
+  
+  if(error == 1) //skip loop if no controller found
+  return; 
+  ps2x.read_gamepad(false, vibrate);          //read controller and set large motor to spin at 'vibrate' speed
+    
+  if(ps2x.Button(PSB_START))                   //will be TRUE as long as button is presse
+    Serial.println("Start is being held");
+  if(ps2x.Button(PSB_SELECT))
+    Serial.println("Select is being held");
+               
+  if(ps2x.Button(PSB_PAD_UP)) {         //will be TRUE as long as button is pressed
+    Serial.print("CIMA: ");
+    Serial.println(ps2x.Analog(PSAB_PAD_UP), DEC);
+    digitalWrite(in_1, LOW);
+    analogWrite(in_2, velocidade);
+    digitalWrite(in_3, LOW);
+    analogWrite(in_4, velocidade);
+  }else {
+    if(ps2x.Button(PSB_PAD_DOWN)){
+      Serial.print("BAIXO: ");
+      Serial.println(ps2x.Analog(PSAB_PAD_UP), DEC);
+      analogWrite(in_1, velocidade);
+      digitalWrite(in_2, LOW);
+      analogWrite(in_3, velocidade);
+      digitalWrite(in_4, LOW);
+  }else {
+    if(ps2x.Button(PSB_PAD_RIGHT)){
+      Serial.print("DIREITA: ");
+      Serial.println(ps2x.Analog(PSAB_PAD_RIGHT), DEC);
+      analogWrite(in_1, velocidade);
+      digitalWrite(in_2, LOW);
+      digitalWrite(in_3, LOW);
+      analogWrite(in_4, velocidade);
+  }else {
+    if(ps2x.Button(PSB_PAD_LEFT)){
+      Serial.print("ESQUERDA: ");
+      Serial.println(ps2x.Analog(PSAB_PAD_LEFT), DEC); 
+      digitalWrite(in_1, LOW);
+      analogWrite(in_2, velocidade);
+      analogWrite(in_3, velocidade);
+      digitalWrite(in_4, LOW);
+  }else {
+    digitalWrite(in_1, LOW);
+    digitalWrite(in_2, LOW);
+    digitalWrite(in_3, LOW);
+    digitalWrite(in_4, LOW);
+        } 
+      }
+    }
+  }
+         
+  if(ps2x.Button(PSB_RED)){
+    Serial.println("Bola pressed"); 
+  }
+    
+  if(ps2x.Button(PSB_PINK)){
+    Serial.println("Squad pressed"); 
+  }
+
+  if(ps2x.Button(PSB_GREEN)){
+    Serial.println("Triangle pressed");
+  }     
+
+  if(ps2x.Button(PSB_BLUE)){
+    Serial.println("X just changed"); 
+    digitalWrite(buzzer, HIGH);
+  }else {
+    digitalWrite(buzzer, LOW);
+  }
+
+   vibrate = ps2x.Analog(PSAB_BLUE);        //this will set the large motor vibrate speed based on 
+      
+////  if(ps2x.ButtonReleased(PSB_PINK))             //permite enviar um sinal, apenas quando solta o botão.    
+//  
+////  if(ps2x.NewButtonState(PSB_BLUE)){            //permite enviar apenas dois sinais: um ao pressionar e outro ao soltar.
+//
+////  if(ps2x.ButtonPressed(PSB_RED))             //permite enviar um sinal, apenas quando aperta o botão.
+  
+  
+   
+                                            //how hard you press the blue (X) button      
+////  if (ps2x.NewButtonState())              envia um sinal para cada aperto
+////  {  
+//    if(ps2x.Button(PSB_L3))
+//     Serial.println("L3 pressed");
+//    if(ps2x.Button(PSB_R3))
+//     Serial.println("R3 pressed");
+     
+    if(ps2x.Button(PSB_L2)){
+      Serial.println("L2 pressed");
+      Serial.println("ESQUERDO");
+      digitalWrite(in_1, LOW);
+      analogWrite(in_2, velocidade_lenta);
+      analogWrite(in_3, velocidade_lenta);
+      digitalWrite(in_4, LOW);
+    }else {
+      if(ps2x.Button(PSB_R2)) {
+        Serial.println("R2 pressed");
+        Serial.println("DIREITA");
+        analogWrite(in_1, velocidade_lenta);
+        digitalWrite(in_2, LOW);
+        digitalWrite(in_3, LOW);
+        analogWrite(in_4, velocidade_lenta);
+        }
+    }
+      
+  if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){ // Enquanto L1 ou R1 estiverem pressionados:
+
+    if (ps2x.Analog(PSS_LY) < 128){ 
+      Serial.print("LY: ");
+      Serial.println(ps2x.Analog(PSS_LY), DEC);
+//    movimento para frente:
+      digitalWrite(in_1, LOW);
+      analogWrite(in_2, velocidade);
+      digitalWrite(in_3, LOW);
+      analogWrite(in_4, velocidade);   
+      }else {
+        if (ps2x.Analog(PSS_LY) > 128){
+          Serial.print("LY: ");
+          Serial.println(ps2x.Analog(PSS_LY), DEC); 
+  //      movimento para trás:              
+          analogWrite(in_1, velocidade);
+          digitalWrite(in_2, LOW);
+          analogWrite(in_3, velocidade);
+          digitalWrite(in_4, LOW);
+         }else {
+           if(ps2x.Analog(PSS_LX) > 128){
+             Serial.print("LX: ");
+             Serial.println(ps2x.Analog(PSS_LX), DEC);
+//           movimento para a direita:
+             analogWrite(in_1, velocidade);
+             digitalWrite(in_2, LOW);
+             digitalWrite(in_3, LOW);
+             analogWrite(in_4, velocidade);
+           }else {
+             if(ps2x.Analog(PSS_LX) < 128){
+               Serial.println(ps2x.Analog(PSS_LX), DEC);
+//             movimento para a esquerda:
+               digitalWrite(in_1, LOW);
+               analogWrite(in_2, velocidade);
+               analogWrite(in_3, velocidade);
+               digitalWrite(in_4, LOW);
+             }else {
+                Serial.print("LY: ");
+                Serial.println(ps2x.Analog(PSS_LY), DEC);
+                Serial.print("LX: ");
+                Serial.println(ps2x.Analog(PSS_LX), DEC);
+                digitalWrite(in_1, LOW);
+                digitalWrite(in_2, LOW);
+                digitalWrite(in_3, LOW);
+                digitalWrite(in_4, LOW);
+               }
+             }
+           }
+         }
+       }   
+         
+//       }
+           
+//       if (ps2x.Analog(PSS_RY), DEC){
+//        Serial.print(ps2x.Analog(PSS_RY), DEC);
+//        }
+
+//       if (ps2x.Analog(PSS_RX), DEC){
+//        Serial.print(ps2x.Analog(PSS_RX), DEC);
+//        }
+
+
+                  
+  delay(20);    
+}
